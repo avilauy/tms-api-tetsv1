@@ -1,0 +1,325 @@
+{
+  "info": {
+    "_postman_id": "14d8dd22-7a3c-4f99-8494-6ec546bc8c68",
+    "name": "TMSQAAPITEST",
+    "description": "Only Actions sub-resource. Contract-driven tests aligned to swagger.json.\n\nEndpoints:\n- GET /api/v1/devices/{serialNo}/actions\n- POST /api/v1/devices/{serialNo}/actions\n- GET /api/v1/devices/{serialNo}/allActionsWithFilters\n\nSecurity: do not log API keys/tokens; do not print full payloads/responses.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "48796746",
+    "_collection_link": "https://go.postman.co/collection/48796746-14d8dd22-7a3c-4f99-8494-6ec546bc8c68?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Actions",
+      "item": [
+        {
+          "name": "GET /api/v1/devices/{serialNo}/actions (contract)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// ===============================",
+                  "// 🔹 Helpers",
+                  "// ===============================",
+                  "const expectedStatus = pm.iterationData.get(\"expectedStatus\");",
+                  "const expectedCode = pm.iterationData.get(\"expectedCode\");",
+                  "",
+                  "const contentType = pm.response.headers.get(\"Content-Type\") || \"\";",
+                  "const isJson = contentType.toLowerCase().includes(\"application/json\");",
+                  "",
+                  "let json = null;",
+                  "if (isJson && pm.response.text()) {",
+                  "  try {",
+                  "    json = pm.response.json();",
+                  "  } catch (e) {",
+                  "    console.log(\"⚠️ JSON parse error\");",
+                  "  }",
+                  "}",
+                  "",
+                  "const isSuccess = pm.response.code === 200;",
+                  "const isClientError = [400, 401, 404].includes(pm.response.code);",
+                  "",
+                  "",
+                  "// ===============================",
+                  "// 🔹 Status code",
+                  "// ===============================",
+                  "pm.test(\"Status code matches expected\", function () {",
+                  "  pm.expect(pm.response.code).to.eql(expectedStatus);",
+                  "});",
+                  "",
+                  "",
+                  "// ===============================",
+                  "// 🔹 Content-Type",
+                  "// ===============================",
+                  "pm.test(\"Response is JSON (when applicable)\", function () {",
+                  "  if (pm.response.text()) {",
+                  "    pm.expect(contentType.toLowerCase())",
+                  "      .to.match(/application\\/json/);",
+                  "  }",
+                  "});",
+                  "",
+                  "",
+                  "// ===============================",
+                  "// 🔹 Schemas",
+                  "// ===============================",
+                  "const schema_200 = {",
+                  "  type: \"object\",",
+                  "  required: [\"statusReturn\"],",
+                  "  additionalProperties: true,",
+                  "  properties: {",
+                  "    statusReturn: {",
+                  "      type: \"object\",",
+                  "      required: [\"responseCode\", \"responseStatus\", \"responseMessage\"],",
+                  "      additionalProperties: true,",
+                  "      properties: {",
+                  "        responseCode: { type: \"string\" },",
+                  "        responseStatus: { type: \"string\" },",
+                  "        responseMessage: { type: \"string\" }",
+                  "      }",
+                  "    },",
+                  "",
+                  "    deviceActions: {",
+                  "      anyOf: [",
+                  "        { type: \"array\" },",
+                  "        { type: \"null\" },",
+                  "        { type: \"object\" } ",
+                  "      ]",
+                  "    }",
+                  "",
+                  "  }",
+                  "};",
+                  "",
+                  "const schema_error = {",
+                  "  type: \"object\",",
+                  "  required: [\"statusReturn\"],",
+                  "  additionalProperties: true,",
+                  "  properties: {",
+                  "    statusReturn: {",
+                  "      type: \"object\",",
+                  "      required: [\"responseCode\", \"responseStatus\", \"responseMessage\"],",
+                  "      additionalProperties: true,",
+                  "      properties: {",
+                  "        responseCode: { type: \"string\" },",
+                  "        responseStatus: { type: \"string\" },",
+                  "        responseMessage: { type: \"string\" }",
+                  "      }",
+                  "    }",
+                  "  }",
+                  "};",
+                  "",
+                  "",
+                  "// ===============================",
+                  "// 🔹 Contract mínimo",
+                  "// ===============================",
+                  "pm.test(\"Response has statusReturn (contract mínimo)\", function () {",
+                  "  if (!json) return;",
+                  "  pm.expect(json).to.have.property(\"statusReturn\");",
+                  "});",
+                  "",
+                  "",
+                  "// ===============================",
+                  "// 🔹 Schema validation",
+                  "// ===============================",
+                  "pm.test(\"Schema matches Swagger (when JSON)\", function () {",
+                  "  if (!json) {",
+                  "    console.log(\"Skipping schema validation (no JSON)\");",
+                  "    return;",
+                  "  }",
+                  "",
+                  "  if (isSuccess) {",
+                  "    pm.response.to.have.jsonSchema(schema_200);",
+                  "  }",
+                  "",
+                  "  if (isClientError) {",
+                  "    pm.response.to.have.jsonSchema(schema_error);",
+                  "  }",
+                  "});",
+                  "",
+                  "",
+                  "// ===============================",
+                  "// 🔹 Business validation",
+                  "// ===============================",
+                  "pm.test(\"Business code matches expected (when JSON)\", function () {",
+                  "  if (!json) {",
+                  "    console.log(\"Skipping business validation (no JSON)\");",
+                  "    return;",
+                  "  }",
+                  "",
+                  "  pm.expect(json).to.have.property(\"statusReturn\");",
+                  "  pm.expect(json.statusReturn).to.have.property(\"responseCode\");",
+                  "",
+                  "  pm.expect(json.statusReturn.responseCode)",
+                  "    .to.eql(expectedCode);",
+                  "});",
+                  "",
+                  "",
+                  "// ===============================",
+                  "// 🔹 Debug",
+                  "// ===============================",
+                  "console.log(\"Status:\", pm.response.code);",
+                  "console.log(\"Has body:\", !!pm.response.text());",
+                  "console.log(\"Is JSON:\", isJson);",
+                  "console.log(\"Expected:\", expectedStatus, expectedCode);",
+                  "",
+                  "if (json) {",
+                  "  console.log(\"ResponseCode:\", json.statusReturn?.responseCode);",
+                  "  console.log(\"ResponseMessage:\", json.statusReturn?.responseMessage);",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// ===============================\r",
+                  "// 🔹 Dynamic data\r",
+                  "// ===============================\r",
+                  "pm.variables.set(\"messageDT\", new Date().toISOString());\r",
+                  "pm.variables.set(\"messageID\", `msg-${Date.now()}`);\r",
+                  "\r",
+                  "\r",
+                  "// ===============================\r",
+                  "// 🔹 API KEY (override seguro)\r",
+                  "// ===============================\r",
+                  "const baseApiKey = pm.environment.get(\"API_KEY\");\r",
+                  "\r",
+                  "const apiKey = pm.iterationData.has(\"apiKeyOverride\")\r",
+                  "  ? pm.iterationData.get(\"apiKeyOverride\")\r",
+                  "  : baseApiKey;\r",
+                  "\r",
+                  "pm.variables.set(\"API_KEY\", apiKey);\r",
+                  "\r",
+                  "\r",
+                  "// ===============================\r",
+                  "// 🔹 SERIAL (DATA > ENV fallback)\r",
+                  "// ===============================\r",
+                  "const serial =\r",
+                  "  pm.iterationData.get(\"SERIAL_NO\") ??\r",
+                  "  pm.environment.get(\"SERIAL_NO\");\r",
+                  "\r",
+                  "  pm.variables.set(\"SERIAL_NO\", serial);\r",
+                  "  pm.environment.set(\"SERIAL_NO\", serial);\r",
+                  "\r",
+                  "\r",
+                  "// ===============================\r",
+                  "// 🔹 VALIDACIÓN INTELIGENTE\r",
+                  "// ===============================\r",
+                  "const expectedStatus = pm.iterationData.get(\"expectedStatus\");\r",
+                  "\r",
+                  "pm.test(\"SERIAL_NO válido (según escenario)\", function () {\r",
+                  "  if (expectedStatus === 200 || expectedStatus === 401) {\r",
+                  "    pm.expect(serial, \"SERIAL_NO requerido\")\r",
+                  "      .to.be.a(\"string\")\r",
+                  "      .and.not.empty;\r",
+                  "  } else {\r",
+                  "    pm.expect(serial !== undefined, \"SERIAL_NO debe existir\").to.be.true;\r",
+                  "  }\r",
+                  "});\r",
+                  "\r",
+                  "\r",
+                  "// ===============================\r",
+                  "// 🔹 ENDPOINT DINÁMICO ROBUSTO\r",
+                  "// ===============================\r",
+                  "let endpoint;\r",
+                  "\r",
+                  "if (!serial) {\r",
+                  "  endpoint = `/api/v1/devices/actions`;\r",
+                  "} else {\r",
+                  "  endpoint = `/api/v1/devices/${serial}/actions`;\r",
+                  "}\r",
+                  "\r",
+                  "pm.variables.set(\"ENDPOINT_PATH\", endpoint);\r",
+                  "\r",
+                  "\r",
+                  "// ===============================\r",
+                  "// 🔹 TRACEABILIDAD\r",
+                  "// ===============================\r",
+                  "pm.variables.set(\"TEST_CASE\", pm.iterationData.get(\"testCase\"));\r",
+                  "\r",
+                  "\r",
+                  "// ===============================\r",
+                  "// 🔹 DEBUG\r",
+                  "// ===============================\r",
+                  "console.log(\"TestCase:\", pm.variables.get(\"TEST_CASE\"));\r",
+                  "console.log(\"Serial:\", serial);\r",
+                  "console.log(\"ExpectedStatus:\", expectedStatus);\r",
+                  "console.log(\"API_KEY:\", apiKey ? \"***masked***\" : \"missing\");"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "messageID",
+                "value": "{{messageID}}"
+              },
+              {
+                "key": "messageDT",
+                "value": "{{messageDT}}"
+              },
+              {
+                "key": "apikey",
+                "value": "{{API_KEY}}"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{BASE_URL}}{{ENDPOINT_PATH}}",
+              "host": [
+                "{{BASE_URL}}{{ENDPOINT_PATH}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "requests": {},
+            "exec": [
+              ""
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {},
+            "exec": [
+              ""
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

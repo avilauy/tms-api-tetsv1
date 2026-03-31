@@ -1,0 +1,45 @@
+[
+  {
+    "testCase": "GET Actions | happy_path",
+    "endpoint": "getActions",
+    "SERIAL_NO": "Q29600058828",
+    "expectedStatus": 200,
+    "expectedCode": "00"
+  },
+  {
+    "testCase": "GET Actions | apikey_invalida",
+    "endpoint": "getActions",
+    "SERIAL_NO": "Q29600051433",
+    "apiKeyOverride": "INVALID_KEY",
+    "expectedStatus": 401,
+    "expectedCode": "01"
+  },
+  {
+    "testCase": "GET Actions | sin_acciones",
+    "endpoint": "getActions",
+    "SERIAL_NO": "Q29600051433",
+    "expectedStatus": 200,
+    "expectedCode": "11"
+  },
+  {
+    "testCase": "GET Actions | serial_invalido_formato",
+    "endpoint": "getActions",
+    "SERIAL_NO": "Q2960005143frf",
+    "expectedStatus": 404,
+    "expectedCode": "03"
+  },
+  {
+    "testCase": "GET Actions | serial_no_existe",
+    "endpoint": "getActions",
+    "SERIAL_NO": "SERIAL_NOExiste",
+    "expectedStatus": 404,
+    "expectedCode": "03"
+  },
+  {
+    "testCase": "GET Actions | serial_vacio",
+    "endpoint": "getActions",
+    "SERIAL_NO": "",
+    "expectedStatus": 404,
+    "expectedCode": "03"
+  }
+]
