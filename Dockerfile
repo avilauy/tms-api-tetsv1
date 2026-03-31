@@ -15,6 +15,8 @@ COPY package*.json ./
 # Instalación de dependencias
 RUN npm install
 
+RUN npm install -g newman newman-reporter-allure
+
 # Validación (falla si newman no está)
 RUN npx newman -v
 
